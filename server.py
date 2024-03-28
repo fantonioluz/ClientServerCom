@@ -11,15 +11,20 @@ serverSocket.listen(1)
 
 print('The server is ready to receive')
 
+
 while True:
     # Accept incoming connection
     connectionSocket, addr = serverSocket.accept()
-
-    # Receive message from client
-    message = connectionSocket.recv(1024).decode()
-
-    # Print the message
-    print(message)
+    while True:
+        try:
+            # Receive message from client
+            message = connectionSocket.recv(1024).decode()
+            print(message)
+            if message == 'exit':
+                break
+        except:
+            connectionSocket.close()
+            connectionSocket, addr = serverSocket.accept()
 
     # Send a message to the client
     connectionSocket.send('Hello, client!'.encode())

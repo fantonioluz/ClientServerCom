@@ -6,8 +6,14 @@ clientSocket = socket(AF_INET, SOCK_STREAM)
 # Connect to the server
 clientSocket.connect(('localhost', 12000))
 
-# Send a message to the server
-clientSocket.send('Hello, server!'.encode())
+
+while True:
+    sender = input('Enter your message: ')
+    if sender == 'exit':
+        break
+    # Send a message to the server
+    clientSocket.send(sender.encode())
+    
 
 # Receive message from server
 message = clientSocket.recv(1024).decode()
