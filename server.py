@@ -1,6 +1,7 @@
 import random
 import socket
 import hashlib
+from time import sleep
 
 # Definir o tempo limite do temporizador (em segundos)
 TIMEOUT = 5
@@ -19,7 +20,7 @@ def enviar_dados_com_checksum(socket, dados):
     checksum = calcular_checksum(dados)
 
     # Concatenar número de sequência, checksum e dados
-    mensagem = str(expected_sequence_number).encode() + b":" + checksum + b":" + dados
+    mensagem = str(expected_sequence_number).encode() + ":" + checksum + ":" + dados
 
     # Enviar dados
     socket.sendall(mensagem)
@@ -32,7 +33,8 @@ def receber_dados_com_checksum(socket):
 
     # Separar número de sequência, checksum e dados reais
     partes = dados.split(b":", 2)
-    
+    for i in range(len(partes)):
+        print(partes[i])
     # Verificar se há três partes
     if len(partes) != 3:
         raise Exception("Dados recebidos incompletos")
@@ -79,14 +81,19 @@ def main():
         print(f"Conexão estabelecida com {endereco_cliente}")
 
         while True:
-            # Exemplo de recebimento de dados confiavelmente
-            dados_recebidos = receber_dados_com_checksum(conexao)
-            print("Dados recebidos:", dados_recebidos.decode())
+            try:
+                # Exemplo de recebimento de dados confiavelmente
+                dados_recebidos = receber_dados_com_checksum(conexao)
+                print("Dados recebidos:", dados_recebidos.decode())
 
-            # Enviar uma resposta simples de volta ao cliente
-            resposta = "Dados recebidos com sucesso"
-            conexao.sendall(resposta.encode())
-
+                # Enviar uma resposta simples de volta ao cliente
+                resposta = "Dados recebidos com sucesso"
+                conexao.sendall(resposta.encode())
+            except:
+                conexao.close()
+                conexao, endereco_cliente = servidor_socket.accept()
+            
+            
     except Exception as e:
         print(f"Erro no servidor: {e}")
 

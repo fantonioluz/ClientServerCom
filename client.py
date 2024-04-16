@@ -24,7 +24,7 @@ def enviar_dados_com_checksum(socket, dados):
     # Adicionar o número de sequência e checksum aos dados
     dados = str(sequence_number).encode() + b":" + checksum + b":" + dados
     sequence_number += 1
-
+    
     # Enviar dados
     socket.sendall(dados)
 
