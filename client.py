@@ -3,15 +3,11 @@ import socket
 import hashlib
 import time
 
-
 # Definir o tempo limite do temporizador (em segundos)
 TIMEOUT = 5
 
 # Número de sequência inicial
 sequence_number = 0
-
-# Tamanho da janela 
-WINDOW_SIZE = 5
 
 def calcular_checksum(dados):
     # Calcular o hash MD5 dos dados
@@ -22,37 +18,32 @@ def calcular_checksum(dados):
 def enviar_dados_com_checksum(socket, dados):
     global sequence_number
 
-    # Adicionar o número de sequência aos dados
-    dados = str(sequence_number).encode() + b":" + dados
-    sequence_number += 1
-
     # Calcular o checksum dos dados
     checksum = calcular_checksum(dados)
 
-    # Enviar checksum e dados
-    socket.sendall(checksum)
+    # Adicionar o número de sequência e checksum aos dados
+    dados = str(sequence_number).encode() + b":" + checksum + b":" + dados
+    sequence_number += 1
+
+    # Enviar dados
     socket.sendall(dados)
-    
-# Função para enviar uma janela de dados
-def enviar_janela(socket, janela):
-    for dados in janela:
-        enviar_dados_com_checksum(socket, dados)
-        
-# Função para simular falha de integridade e/ou perda de mensagens
-def simular_falha():
-    return random.random() < 0.2  # Probabilidade de 20%
 
 def receber_dados_com_checksum(socket):
-    # Receber checksum e dados
-    checksum_recebido = socket.recv(16)  # MD5 tem 16 bytes
+    # Receber dados
     dados = socket.recv(1024)  # Tamanho máximo dos dados, ajuste conforme necessário
 
+    # Separar número de sequência e checksum dos dados
+    partes = dados.split(b":", 2)
+    numero_sequencia = int(partes[0])
+    checksum_recebido = partes[1]
+    dados_reais = partes[2]
+
     # Calcular o checksum dos dados recebidos
-    checksum_calculado = calcular_checksum(dados)
+    checksum_calculado = calcular_checksum(dados_reais)
 
     # Verificar se os checksums coincidem
     if checksum_recebido == checksum_calculado:
-        return dados
+        return dados_reais
     else:
         raise Exception("Erro de integridade: checksums não coincidem")
 
@@ -77,21 +68,9 @@ def enviar_dados_confiavelmente(socket, dados):
         print("Tempo limite atingido ao aguardar resposta do servidor")
     except Exception as e:
         print(f"Erro ao enviar dados: {e}")
-
-# Função para receber dados confiavelmente (com soma de verificação)
-def receber_dados_confiavelmente(socket):
-    try:
-        inicio_temporizador = time.time()
-        while True:
-            dados = receber_dados_com_checksum(socket)
-            print("Dados recebidos com sucesso")
-            socket.sendall(b"ACK")  # Enviar reconhecimento
-            return dados
-            
-    except socket.timeout:
-        print("Tempo limite atingido ao aguardar dados do cliente")
-    except Exception as e:
-        print(f"Erro ao receber dados: {e}")
+    finally:
+        # Fechar o socket
+        socket.close()
 
 # Função principal do cliente
 def main():
@@ -106,12 +85,13 @@ def main():
         # Conectar ao servidor
         cliente_socket.connect((host, porta))
 
-        # Exemplo de envio de dados confiavelmente
-        enviar_dados_confiavelmente(cliente_socket, "Dados de teste confiáveis".encode("utf-8"))
-
-        # Exemplo de recebimento de dados confiavelmente
-        dados_recebidos = receber_dados_confiavelmente(cliente_socket)
-        print("Dados recebidos:", dados_recebidos.decode())
+        while True:
+            print('Qual mensagem deseja enviar? (Digite "exit" para sair)')
+            mensagem = input() 
+            if mensagem == 'exit':
+                break
+            # Enviar dados confiavelmente
+            enviar_dados_confiavelmente(cliente_socket, mensagem.encode("utf-8"))
 
     except Exception as e:
         print(f"Erro ao conectar ao servidor: {e}")
