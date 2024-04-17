@@ -1,11 +1,52 @@
+import json
 import random
 import socket
 import hashlib
 import time
 
+#Estrutura para Armazenar Lista Telefônica:s
+lista_telefonica = {'Alice':'123'}
+
+def showListaTelefonica():
+    for chave, valor in lista_telefonica.items():
+        print(f'Chave: {chave}, Valor: {valor}')
+
+#método que decode diferenciar a msg de search e add e usar no metodo de recebimento
+def decode_msg(respostaCliente): #decofifciar a stri json
+    #desserializar a msg antes de decodificar
+    mensagem = respostaCliente #debug
+    mensagem_Desserializada = json.loads(respostaCliente) #aqui deixa de ser json e passa a ser
+
+    #Verifica o tipo de ação na mensagem e chama o método correspondente
+    if mensagem_Desserializada["acao"] == "Get":
+       processar_mensagem_get(mensagem_Desserializada["nome"])
+    elif mensagem_Desserializada["acao"] == "Add":
+       processar_mensagem_add(mensagem_Desserializada["nome"], mensagem_Desserializada["telefone"])
+    
+    return lista_telefonica
+       
+
+def processar_mensagem_get(nome):
+        # Processa a mensagem "get" e retorna o telefone correspondente ao nome fornecido
+        if nome in lista_telefonica:
+            print("Numero encontrado")
+            return lista_telefonica
+            # Aqui você pode enviar o telefone de volta para o cliente se necessário
+        else:
+            print(f"Não há número registrado para {nome}")
+            return lista_telefonica
+
+def processar_mensagem_add(nome, telefone):
+        # Processa a mensagem "add" e adiciona o novo número à lista telefônica
+        lista_telefonica[nome] = telefone
+
+        print(f"Número de telefone adicionado para {nome}: {telefone}")
+
+        return lista_telefonica
+        
 
 # Definir o tempo limite do temporizador (em segundos)
-TIMEOUT = 5
+TIMEOUT = 60
 
 # Número de sequência esperado
 expected_sequence_number = 0
@@ -47,7 +88,9 @@ def receber_dados_com_checksum(socket):
         # Verificar se o número de sequência é o esperado
         if numero_sequencia == expected_sequence_number:
             expected_sequence_number += 1
-            return dados_reais
+
+            return dados_reais #os dados reais (sem o número de sequência) são retornados para que possam ser processados pelo servidor. 
+        
         else:
             # Enviar NACK para solicitar retransmissão
             socket.sendall(b"NACK")
@@ -62,7 +105,6 @@ def receber_janela(socket):
         dados = receber_dados_com_checksum(socket)
         janela.append(dados)
     return janela
-
 
 # Função para simular falha de integridade e/ou perda de mensagens
 def simular_falha():
@@ -95,52 +137,21 @@ def enviar_dados_confiavelmente(socket, dados):
 def receber_dados_confiavelmente(socket):
     try:
         inicio_temporizador = time.time()
+
         while True:
             dados = receber_dados_com_checksum(socket)
-            print("Dados recebidos com sucesso")
+            print("Dados recebidos com sucesso:")
+            print(dados) #recebeu a string json p decodificar
             socket.sendall(b"ACK")  # Enviar reconhecimento
-            return dados
+
+            msgdecode = decode_msg(dados)
+
+            #tratar os dados aqui
+            return msgdecode
+            #return dados
             
     except Exception as e:
         print(f"Erro ao receber dados: {e}")
         if time.time() - inicio_temporizador > TIMEOUT:
             raise Exception("Tempo limite excedido ao aguardar dados do cliente")
 
-# Função principal do servidor
-def main():
-    # Configurar host e porta
-    host = 'localhost'  # Ou deixe em branco para todas as interfaces
-    porta = 12345  # Porta para comunicação
-
-    # Criar um socket TCP/IP
-    servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    try:
-        # Vincular o socket à porta
-        servidor_socket.bind((host, porta))
-
-        # Escutar conexões
-        servidor_socket.listen(5)
-
-        print("Servidor pronto para receber conexões...")
-
-        # Aceitar conexões
-        conexao, endereco_cliente = servidor_socket.accept()
-        print(f"Conexão estabelecida com {endereco_cliente}")
-
-        # Exemplo de recebimento de dados confiavelmente
-        dados_recebidos = receber_dados_confiavelmente(conexao)
-        print("Dados recebidos:", dados_recebidos.decode())
-
-        # Exemplo de envio de dados confiavelmente
-        enviar_dados_confiavelmente(conexao, "Resposta do servidor confiável".encode("utf-8"))
-
-    except Exception as e:
-        print(f"Erro no servidor: {e}")
-
-    finally:
-        # Fechar o socket do servidor
-        servidor_socket.close()
-
-if __name__ == "__main__":
-    main()
