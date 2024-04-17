@@ -47,37 +47,32 @@ def calcular_checksum(dados):
 def enviar_dados_com_checksum(socket, dados):
     global sequence_number
 
-    # Adicionar o número de sequência aos dados
-    dados = str(sequence_number).encode() + b":" + dados
-    sequence_number += 1
-
     # Calcular o checksum dos dados
     checksum = calcular_checksum(dados)
 
-    # Enviar checksum e dados
-    socket.sendall(checksum)
-    socket.sendall(dados)
+    # Adicionar o número de sequência e checksum aos dados
+    dados = str(sequence_number).encode() + b":" + checksum + b":" + dados
+    sequence_number += 1
     
-# Função para enviar uma janela de dados
-def enviar_janela(socket, janela):
-    for dados in janela:
-        enviar_dados_com_checksum(socket, dados)
-        
-# Função para simular falha de integridade e/ou perda de mensagens
-def simular_falha():
-    return random.random() < 0.2  # Probabilidade de 20%
+    # Enviar dados
+    socket.sendall(dados)
 
 def receber_dados_com_checksum(socket):
-    # Receber checksum e dados
-    checksum_recebido = socket.recv(16)  # MD5 tem 16 bytes
+    # Receber dados
     dados = socket.recv(1024)  # Tamanho máximo dos dados, ajuste conforme necessário
 
+    # Separar número de sequência e checksum dos dados
+    partes = dados.split(b":", 2)
+    numero_sequencia = int(partes[0])
+    checksum_recebido = partes[1]
+    dados_reais = partes[2]
+
     # Calcular o checksum dos dados recebidos
-    checksum_calculado = calcular_checksum(dados)
+    checksum_calculado = calcular_checksum(dados_reais)
 
     # Verificar se os checksums coincidem
     if checksum_recebido == checksum_calculado:
-        return dados
+        return dados_reais
     else:
         raise Exception("Erro de integridade: checksums não coincidem")
 
@@ -129,3 +124,66 @@ def receber_dados_confiavelmente(socket):
         else:
            print(f"Erro ao enviar dados: {e}")
 
+        print(f"Erro ao enviar dados: {e}")
+    finally:
+        # Fechar o socket
+        socket.close()
+
+#menu de opção
+def exibir_menu():
+    print("Menu:")
+    print("1. Troca de Mensagem")
+    print("2. Janela/Paralelismo")
+    print("3. opção 3")
+    print("4. Encerrar o programa")
+
+# Função principal do cliente
+def main():
+    # Configurar host e porta
+    host = 'localhost'  # Ou o IP do servidor
+    porta = 12345  # Porta para comunicação
+
+    # Criar um socket TCP/IP
+    cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    while True:
+        exibir_menu()
+        opcao = input("Digite o número da opção desejada: ")
+
+        if opcao == "1":
+            # Troca de mensagem           
+            try:
+                # Conectar ao servidor
+                cliente_socket.connect((host, porta))
+
+                while True:
+                    print('Qual mensagem deseja enviar? (Digite "exit" para sair)')
+                    mensagem = input() 
+                    if mensagem == 'exit':
+                        break
+                    # Enviar dados confiavelmente
+                    enviar_dados_confiavelmente(cliente_socket, mensagem.encode("utf-8"))
+
+            except Exception as e:
+                print(f"Erro ao conectar ao servidor: {e}")
+
+            finally:
+                # Fechar o socket
+                cliente_socket.close()
+
+        elif opcao == "2":
+            # Implemente o código para a opção 2 aqui
+            pass
+        elif opcao == "3":
+            # Implemente o código para a opção 3 aqui
+            pass
+        elif opcao == "4":
+            # Encerrar o programa
+            break
+        else:
+            print("Opção inválida. Por favor, escolha uma opção válida.")
+
+    # Resto do código...
+
+if __name__ == "__main__":
+    main()
