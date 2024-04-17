@@ -72,6 +72,14 @@ def enviar_dados_confiavelmente(socket, dados):
         # Fechar o socket
         socket.close()
 
+#menu de opção
+def exibir_menu():
+    print("Menu:")
+    print("1. Troca de Mensagem")
+    print("2. Janela/Paralelismo")
+    print("3. opção 3")
+    print("4. Encerrar o programa")
+
 # Função principal do cliente
 def main():
     # Configurar host e porta
@@ -81,24 +89,44 @@ def main():
     # Criar um socket TCP/IP
     cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    try:
-        # Conectar ao servidor
-        cliente_socket.connect((host, porta))
+    while True:
+        exibir_menu()
+        opcao = input("Digite o número da opção desejada: ")
 
-        while True:
-            print('Qual mensagem deseja enviar? (Digite "exit" para sair)')
-            mensagem = input() 
-            if mensagem == 'exit':
-                break
-            # Enviar dados confiavelmente
-            enviar_dados_confiavelmente(cliente_socket, mensagem.encode("utf-8"))
+        if opcao == "1":
+            # Troca de mensagem           
+            try:
+                # Conectar ao servidor
+                cliente_socket.connect((host, porta))
 
-    except Exception as e:
-        print(f"Erro ao conectar ao servidor: {e}")
+                while True:
+                    print('Qual mensagem deseja enviar? (Digite "exit" para sair)')
+                    mensagem = input() 
+                    if mensagem == 'exit':
+                        break
+                    # Enviar dados confiavelmente
+                    enviar_dados_confiavelmente(cliente_socket, mensagem.encode("utf-8"))
 
-    finally:
-        # Fechar o socket
-        cliente_socket.close()
+            except Exception as e:
+                print(f"Erro ao conectar ao servidor: {e}")
+
+            finally:
+                # Fechar o socket
+                cliente_socket.close()
+
+        elif opcao == "2":
+            # Implemente o código para a opção 2 aqui
+            pass
+        elif opcao == "3":
+            # Implemente o código para a opção 3 aqui
+            pass
+        elif opcao == "4":
+            # Encerrar o programa
+            break
+        else:
+            print("Opção inválida. Por favor, escolha uma opção válida.")
+
+    # Resto do código...
 
 if __name__ == "__main__":
     main()
