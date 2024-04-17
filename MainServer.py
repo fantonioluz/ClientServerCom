@@ -2,6 +2,7 @@
 import server
 import socket
 
+#extrair main para essa classe
 def main():
     # Configurar host e porta
     host = 'localhost'  # Ou deixe em branco para todas as interfaces

@@ -4,6 +4,8 @@ import socket
 import hashlib
 import time
 
+from client import WINDOW_SIZE
+
 #Estrutura para Armazenar Lista Telefônica:s
 lista_telefonica = {'Alice':'123'}
 

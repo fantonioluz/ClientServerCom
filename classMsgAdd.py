@@ -1,5 +1,6 @@
 import json
 
+#msg
 class classMsgAdd:
     def __init__(self, acao, nome, telefone):
         self.acao = acao

@@ -2,6 +2,7 @@
 import socket
 import client
 
+#extrair main para essa classe
 def main():
     # Configurar host e porta
     host = 'localhost'  # Ou o IP do servidor

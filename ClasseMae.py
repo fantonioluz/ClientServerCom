@@ -4,6 +4,7 @@ import socket
 import hashlib
 import time
 
+#extrair metodos iguais de server e cliente para ca
 class ClasseMae:
 
     def calcular_checksum(dados):

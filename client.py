@@ -5,21 +5,16 @@ import time
 from classMsgAdd import classMsgAdd
 from classMsgGet import classMsgGet
 
-
 #Método de Envio de Requisição:
 #1. método de pegar - get
-
 def enviarMsg_pegar_telefone(socket, nome):
     #montar uma msg dessa requisição com o nome fornecido no método
-
-    #instanciar o objeto msg p preencher com nome
     objetoMensagem = classMsgGet("Get", nome)
     #serializar antes de enviar
     msgSerializada = objetoMensagem.to_json()
     
     return msgSerializada
-    #enviando a msg de search já serializada para o método que envia ela com checksum e confiabilidade
-    #enviar_dados_com_checksum(socket, msgSerializada)
+
 
 #1. método de adicionar - Add
 def enviarMsg_add_telefone(socket, nome, telefone):
