@@ -7,7 +7,7 @@ import time
 from client import WINDOW_SIZE
 
 #Estrutura para Armazenar Lista Telefônica:s
-lista_telefonica = {'Alice':'123'}
+lista_telefonica = {}
 
 def showListaTelefonica():
     for chave, valor in lista_telefonica.items():
@@ -67,7 +67,7 @@ def enviar_dados_com_checksum(socket, dados):
     checksum = calcular_checksum(dados)
 
     # Concatenar número de sequência, checksum e dados
-    mensagem = str(expected_sequence_number).encode() + ":" + checksum + ":" + dados
+    mensagem = str(expected_sequence_number).encode() + b":" + checksum + b":" + dados
 
     # Enviar dados
     socket.sendall(mensagem)
@@ -135,6 +135,7 @@ def enviar_dados_confiavelmente(socket, dados):
                 if resposta:
                     print("Resposta do servidor:", resposta.decode())
                     break  # Saia do loop se receber uma resposta
+
             except socket.timeout:
                 print("Tempo limite atingido. Tentando novamente...")
                 if time.time() - inicio_temporizador > TIMEOUT:
@@ -167,48 +168,3 @@ def receber_dados_confiavelmente(socket):
 
 
 
-# Função principal do servidor
-def main():
-    # Configurar host e porta
-    host = 'localhost'  # Ou deixe em branco para todas as interfaces
-    porta = 12345  # Porta para comunicação
-
-    # Criar um socket TCP/IP
-    servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    try:
-        # Vincular o socket à porta
-        servidor_socket.bind((host, porta))
-
-        # Escutar conexões
-        servidor_socket.listen(5)
-        
-        print("Servidor pronto para receber conexões...")
-
-        # Aceitar conexões
-        conexao, endereco_cliente = servidor_socket.accept()
-        print(f"Conexão estabelecida com {endereco_cliente}")
-
-        while True:
-            try:
-                # Exemplo de recebimento de dados confiavelmente
-                dados_recebidos = receber_dados_com_checksum(conexao)
-                print("Dados recebidos:", dados_recebidos.decode())
-
-                # Enviar uma resposta simples de volta ao cliente
-                resposta = "Dados recebidos com sucesso"
-                conexao.sendall(resposta.encode())
-            except:
-                conexao.close()
-                conexao, endereco_cliente = servidor_socket.accept()
-            
-            
-    except Exception as e:
-        print(f"Erro no servidor: {e}")
-
-    finally:
-        # Fechar o socket do servidor
-        servidor_socket.close()
-
-if __name__ == "__main__":
-    main()
