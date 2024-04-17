@@ -2,13 +2,37 @@ import random
 import socket
 import hashlib
 import time
+from classMsgAdd import classMsgAdd
+from classMsgGet import classMsgGet
+
+#Método de Envio de Requisição:
+#1. método de pegar - get
+def enviarMsg_pegar_telefone(socket, nome):
+    #montar uma msg dessa requisição com o nome fornecido no método
+    objetoMensagem = classMsgGet("Get", nome)
+    #serializar antes de enviar
+    msgSerializada = objetoMensagem.to_json()
+    
+    return msgSerializada
+
+
+#1. método de adicionar - Add
+def enviarMsg_add_telefone(socket, nome, telefone):
+    objetoMensagemAdd = classMsgAdd("Add", nome, telefone)
+    msgAddSerializada = objetoMensagemAdd.to_json()
+
+    return msgAddSerializada
+    #enviar_dados_com_checksum(socket, msgAddSerializada)
 
 # Definir o tempo limite do temporizador (em segundos)
-TIMEOUT = 5
+TIMEOUT = 60
 
 # Número de sequência inicial
 sequence_number = 0
 
+# Tamanho da janela 
+WINDOW_SIZE = 5
+     
 def calcular_checksum(dados):
     # Calcular o hash MD5 dos dados
     hash_md5 = hashlib.md5()
@@ -52,6 +76,7 @@ def enviar_dados_confiavelmente(socket, dados):
     try:
         inicio_temporizador = time.time()
         while True:
+            #chamar metodo da msg serialiada aqui e englobar o enviar dados com checksum dentro dele
             enviar_dados_com_checksum(socket, dados)
             print("Dados enviados com sucesso")
             
@@ -64,9 +89,36 @@ def enviar_dados_confiavelmente(socket, dados):
             if time.time() - inicio_temporizador > TIMEOUT:
                 raise Exception("Tempo limite excedido ao aguardar resposta do servidor")
 
-    except socket.timeout:
-        print("Tempo limite atingido ao aguardar resposta do servidor")
+    #except socket.timeout:
+     #   print("Tempo limite atingido ao aguardar resposta do servidor")
+    #except Exception as e:
+     #   print(f"Erro ao enviar dados: {e}")
     except Exception as e:
+        if type(e) == socket.timeout:
+           print("Tempo limite atingido ao aguardar resposta do servidor")
+        else:
+           print(f"Erro ao enviar dados: {e}")
+
+# Função para receber dados confiavelmente (com soma de verificação)
+def receber_dados_confiavelmente(socket):
+    try:
+        inicio_temporizador = time.time()
+        while True:
+            dados = receber_dados_com_checksum(socket)
+            print("Dados recebidos com sucesso")
+            socket.sendall(b"ACK")  # Enviar reconhecimento
+            return dados
+            
+    #except socket.timeout:
+     #   print("Tempo limite atingido ao aguardar dados do cliente")
+    #except Exception as e:
+     #   print(f"Erro ao receber dados: {e}")
+    except Exception as e:
+        if type(e) == socket.timeout:
+           print("Tempo limite atingido ao aguardar resposta do servidor")
+        else:
+           print(f"Erro ao enviar dados: {e}")
+
         print(f"Erro ao enviar dados: {e}")
     finally:
         # Fechar o socket
