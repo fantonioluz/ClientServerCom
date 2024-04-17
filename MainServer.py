@@ -30,7 +30,8 @@ def main():
         print("Dados adicionados na lista:", dados_recebidos)
 
         # Exemplo de envio de dados confiavelmente
-        server.enviar_dados_confiavelmente(conexao, "Resposta do servidor confiável".encode("utf-8"))
+        msg = "Resposta do servidor confiável"
+        server.enviar_dados_confiavelmente(conexao, msg.encode("utf-8"))
 
     except Exception as e:
         print(f"Erro no servidor: {e}")

@@ -17,7 +17,7 @@ def main():
 
         # Exemplo de envio de dados confiavelmente
         #enviar_dados_confiavelmente(cliente_socket, "Dados de teste confiáveis".encode("utf-8"))
-        dadoParaEnviar = client.enviarMsg_add_telefone(cliente_socket, 'Bruna', '992607551')
+        dadoParaEnviar = client.enviarMsg_add_telefone(cliente_socket, 'teste', '111111111')
         client.enviar_dados_confiavelmente(cliente_socket, dadoParaEnviar.encode() ) #o dado que eu quero que ele mande é o obj serializado
 
         #dadoParaEnviar2 = client.enviarMsg_add_telefone(cliente_socket, 'Alice', '12345678')
