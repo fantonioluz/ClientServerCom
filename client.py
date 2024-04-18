@@ -104,7 +104,7 @@ def receber_dados_confiavelmente(socket):
     try:
         inicio_temporizador = time.time()
         while True:
-            dados = receber_dados_com_checksum(socket)
+            dados = socket.recv(1024)
             # print("Dados recebidos com sucesso")
             return dados
             
@@ -126,9 +126,20 @@ def receber_dados_confiavelmente(socket):
 # Exibir o menu de opções
 def menu():
     print("1. Adicionar contato")
-    print("2. Pesquisar contato")
+    print("2. Simular erro de integridade")
     print("3. Sair")
     
     opcao = input("Escolha uma opção: ")
     return opcao
 
+def simulate_integrity_error(socket, dados):
+    # Simular um erro de integridade
+    dados_corrompidos = b"0:" + b"0" * len(dados) + b":" + dados
+    socket.sendall(dados_corrompidos)
+    
+
+    
+
+    
+    
+    

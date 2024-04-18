@@ -107,8 +107,10 @@ def receber_dados_com_checksum(socket):
         else:
             raise Exception("Número de sequência incorreto")
     else:
+        socket.sendall(b"NAK")  # Enviar NAK
         raise Exception("Erro de integridade: checksums não coincidem")
 
+    
 # Função para receber uma janela de dados
 def receber_janela(socket):
     janela = []
@@ -116,6 +118,8 @@ def receber_janela(socket):
         dados = receber_dados_com_checksum(socket)
         janela.append(dados)
     return janela
+
+
 
 # Função para enviar dados confiavelmente (com soma de verificação)
 def enviar_dados_confiavelmente(socket, dados):
@@ -148,10 +152,9 @@ def receber_dados_confiavelmente(socket):
 
         while True:
             dados = receber_dados_com_checksum(socket)
-            """print("Dados recebidos com sucesso:")
-            print(dados) #recebeu a string json p decodificar"""
+
             
-            socket.sendall(b"ACK")  # Enviar reconhecimento
+            socket.sendall("ACK".encode("utf-8"))  # Enviar reconhecimento
 
             msgdecode = decode_msg(dados)
 
@@ -172,18 +175,23 @@ def confirmacao_recebimento():
     opcao = input("Escolha uma opção: ")
     return opcao
 
+# Variável global para armazenar os dados recebidos
+received_data = defaultdict(list)
+
+sequence_numbers = {}
+id_cliente = []
+
 # Função para lidar com cada conexão
 def handle_client_connection(conexao, endereco_cliente):
-    
+    global sequence_numbers
     
     try:
-        print("Conexão estabelecida com:", endereco_cliente)
+        print("Conexão estabelecida com:", endereco_cliente)    
+        
         dados_recebidos = receber_dados_confiavelmente(conexao)
         print("Dados adicionados na lista:", dados_recebidos)
 
-        # Exemplo de envio de dados confiavelmente
-        msg = "Resposta do servidor confiável"
-        enviar_dados_confiavelmente(conexao, msg.encode("utf-8"))
+        
     except Exception as e:
         print(f"Erro ao lidar com a conexão: {e}")
     finally:
