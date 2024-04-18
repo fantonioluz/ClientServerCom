@@ -1,4 +1,4 @@
-#Modo de uso
+# Modo de uso
 Rodar o arquivo MainServer.py em um terminal e o arquivo MainCliente.py em outro.
 
 
