@@ -154,7 +154,7 @@ def receber_dados_confiavelmente(socket):
             dados = receber_dados_com_checksum(socket)
 
             
-            socket.sendall("ACK".encode("utf-8"))  # Enviar reconhecimento
+            socket.sendall(b"ACK")  # Enviar reconhecimento
 
             msgdecode = decode_msg(dados)
 
@@ -186,7 +186,7 @@ def handle_client_connection(conexao, endereco_cliente):
     global sequence_numbers
     
     try:
-        print("Conexão estabelecida com:", endereco_cliente)    
+        print(f"Conexão estabelecida com {endereco_cliente}")
         
         dados_recebidos = receber_dados_confiavelmente(conexao)
         print("Dados adicionados na lista:", dados_recebidos)
@@ -194,7 +194,4 @@ def handle_client_connection(conexao, endereco_cliente):
         
     except Exception as e:
         print(f"Erro ao lidar com a conexão: {e}")
-    finally:
-        # Fechar a conexão
-        conexao.close()
 

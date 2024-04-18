@@ -22,20 +22,19 @@ def main():
         servidor_socket.listen(5)
             
         print("Servidor pronto para receber conexões...")
+        conexao, endereco_cliente = servidor_socket.accept()
         
         if recepcao == "1":
         
-            while True:
-                conexao, endereco_cliente = servidor_socket.accept()
-
-                # Criar uma thread para lidar com a conexão
-                thread = threading.Thread(target=server.handle_client_connection, args=(conexao, endereco_cliente))
-                thread.start()
+            # Criar uma thread para lidar com a conexão
+            thread = threading.Thread(target=server.handle_client_connection, args=(conexao, endereco_cliente))
+            thread.start()
         
         else:
             while True:
-                conexao, endereco_cliente = servidor_socket.accept()
+                
                 server.handle_client_connection(conexao, endereco_cliente)
+                
 
     except Exception as e:
         print(f"Erro no servidor: {e}")

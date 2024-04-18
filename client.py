@@ -103,10 +103,10 @@ def enviar_dados_confiavelmente(socket, dados):
 def receber_dados_confiavelmente(socket):
     try:
         inicio_temporizador = time.time()
-        while True:
-            dados = socket.recv(1024)
-            # print("Dados recebidos com sucesso")
-            return dados
+        
+        dados = socket.recv(1024)
+        # print("Dados recebidos com sucesso")
+        return dados
             
     #except socket.timeout:
      #   print("Tempo limite atingido ao aguardar dados do cliente")
@@ -127,7 +127,8 @@ def receber_dados_confiavelmente(socket):
 def menu():
     print("1. Adicionar contato")
     print("2. Simular erro de integridade")
-    print("3. Sair")
+    print("3. Enviar vários pacotes ao mesmo tempo")
+    print("4. Sair")
     
     opcao = input("Escolha uma opção: ")
     return opcao
