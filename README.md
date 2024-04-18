@@ -1,3 +1,7 @@
+#Modo de uso
+Rodar o arquivo MainServer.py em um terminal e o arquivo MainCliente.py em outro.
+
+
 # 1. Introdução
 O projeto desenvolvido para a cadeira de Comunicação de Redes consiste em um sistema de comunicação entre cliente e servidor, implementando funcionalidades básicas de uma lista telefônica digital. O sistema permite adicionar e buscar contatos através de uma interface de rede, utilizando o protocolo TCP/IP para garantir a entrega e a integridade das mensagens.
 
