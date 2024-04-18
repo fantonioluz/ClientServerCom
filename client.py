@@ -17,7 +17,7 @@ def enviarMsg_pegar_telefone(socket, nome):
 
 
 #1. método de adicionar - Add
-def enviarMsg_add_telefone(socket, nome, telefone):
+def enviarMsg_add_telefone(nome, telefone):
     objetoMensagemAdd = classMsgAdd("Add", nome, telefone)
     msgAddSerializada = objetoMensagemAdd.to_json()
 
@@ -78,7 +78,7 @@ def enviar_dados_confiavelmente(socket, dados):
         while True:
             #chamar metodo da msg serialiada aqui e englobar o enviar dados com checksum dentro dele
             enviar_dados_com_checksum(socket, dados)
-            print("Dados enviados com sucesso")
+            # print("Dados enviados com sucesso")
             
             # Esperar pela resposta
             socket.settimeout(TIMEOUT)
@@ -105,8 +105,7 @@ def receber_dados_confiavelmente(socket):
         inicio_temporizador = time.time()
         while True:
             dados = receber_dados_com_checksum(socket)
-            print("Dados recebidos com sucesso")
-            socket.sendall(b"ACK")  # Enviar reconhecimento
+            # print("Dados recebidos com sucesso")
             return dados
             
     #except socket.timeout:
@@ -120,15 +119,16 @@ def receber_dados_confiavelmente(socket):
            print(f"Erro ao enviar dados: {e}")
 
         print(f"Erro ao enviar dados: {e}")
-    finally:
-        # Fechar o socket
-        socket.close()
+    # finally:
+    #     # Fechar o socket
+    #     socket.close()
 
-#menu de opção
-def exibir_menu():
-    print("Menu:")
-    print("1. Troca de Mensagem")
-    print("2. Janela/Paralelismo")
-    print("3. opção 3")
-    print("4. Encerrar o programa")
+# Exibir o menu de opções
+def menu():
+    print("1. Adicionar contato")
+    print("2. Pesquisar contato")
+    print("3. Sair")
+    
+    opcao = input("Escolha uma opção: ")
+    return opcao
 

@@ -3,11 +3,14 @@ import random
 import socket
 import hashlib
 import time
-
+from collections import defaultdict
+import client
 from client import WINDOW_SIZE
 
 #Estrutura para Armazenar Lista Telefônica:s
 lista_telefonica = {}
+sequence_numbers = {}
+cliente_atual = 0
 
 def showListaTelefonica():
     for chave, valor in lista_telefonica.items():
@@ -76,20 +79,19 @@ def receber_dados_com_checksum(socket):
     global expected_sequence_number
 
     # Receber dados
-    dados = socket.recv(1024)  # Tamanho máximo dos dados, ajuste conforme necessário
+    dados = socket.recv(2048)  # Tamanho máximo dos dados, ajuste conforme necessário
 
     # Separar número de sequência, checksum e dados reais
     partes = dados.split(b":", 2)
-    for i in range(len(partes)):
-        print(partes[i])
     # Verificar se há três partes
     if len(partes) != 3:
         raise Exception("Dados recebidos incompletos")
 
     # Extrair número de sequência, checksum e dados reais
-    numero_sequencia = int(partes[0])
+    numero_sequencia = int(partes[0]) 
     checksum_recebido = partes[1]
     dados_reais = partes[2]
+    
 
     # Calcular o checksum dos dados recebidos
     checksum_calculado = calcular_checksum(dados_reais)
@@ -107,7 +109,6 @@ def receber_dados_com_checksum(socket):
     else:
         raise Exception("Erro de integridade: checksums não coincidem")
 
-    
 # Função para receber uma janela de dados
 def receber_janela(socket):
     janela = []
@@ -116,17 +117,13 @@ def receber_janela(socket):
         janela.append(dados)
     return janela
 
-# Função para simular falha de integridade e/ou perda de mensagens
-def simular_falha():
-    return random.random() < 0.2  # Probabilidade de 20%
-
 # Função para enviar dados confiavelmente (com soma de verificação)
 def enviar_dados_confiavelmente(socket, dados):
     try:
         inicio_temporizador = time.time()
         while True:
             enviar_dados_com_checksum(socket, dados)
-            print("Dados enviados com sucesso")
+            # print("Dados enviados com sucesso")
             
             # Esperar pela resposta
             socket.settimeout(TIMEOUT)
@@ -151,8 +148,9 @@ def receber_dados_confiavelmente(socket):
 
         while True:
             dados = receber_dados_com_checksum(socket)
-            print("Dados recebidos com sucesso:")
-            print(dados) #recebeu a string json p decodificar
+            """print("Dados recebidos com sucesso:")
+            print(dados) #recebeu a string json p decodificar"""
+            
             socket.sendall(b"ACK")  # Enviar reconhecimento
 
             msgdecode = decode_msg(dados)
@@ -166,5 +164,29 @@ def receber_dados_confiavelmente(socket):
         if time.time() - inicio_temporizador > TIMEOUT:
             raise Exception("Tempo limite excedido ao aguardar dados do cliente")
 
+# Menu para multiplos recebimento de dados ou apenas um
+def confirmacao_recebimento():
+    print("Deseja confirmar recepção de multiplos dados?")
+    print("1 - Sim")
+    print("2 - Não")
+    opcao = input("Escolha uma opção: ")
+    return opcao
 
+# Função para lidar com cada conexão
+def handle_client_connection(conexao, endereco_cliente):
+    
+    
+    try:
+        print("Conexão estabelecida com:", endereco_cliente)
+        dados_recebidos = receber_dados_confiavelmente(conexao)
+        print("Dados adicionados na lista:", dados_recebidos)
+
+        # Exemplo de envio de dados confiavelmente
+        msg = "Resposta do servidor confiável"
+        enviar_dados_confiavelmente(conexao, msg.encode("utf-8"))
+    except Exception as e:
+        print(f"Erro ao lidar com a conexão: {e}")
+    finally:
+        # Fechar a conexão
+        conexao.close()
 
